@@ -54,9 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SmallDahuaLib\SmallDahuaLib.csproj">
+    <ProjectReference Include="..\SmallDahuaLib\DahuaSharp.csproj">
       <Project>{68eaadee-77cf-49d7-a504-52f8f2d0b3d2}</Project>
-      <Name>SmallDahuaLib</Name>
+      <Name>DahuaSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 14 for Windows Desktop
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallDahuaLib", "SmallDahuaLib\SmallDahuaLib.csproj", "{68EAADEE-77CF-49D7-A504-52F8F2D0B3D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DahuaSharp", "SmallDahuaLib\DahuaSharp.csproj", "{68EAADEE-77CF-49D7-A504-52F8F2D0B3D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallDahuaLib.Tests", "SmallDahuaLib.Tests\SmallDahuaLib.Tests.csproj", "{3C03691A-A323-43CF-9104-B4539ABD96E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DahuaSharp.Tests", "SmallDahuaLib.Tests\DahuaSharp.Tests.csproj", "{3C03691A-A323-43CF-9104-B4539ABD96E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
