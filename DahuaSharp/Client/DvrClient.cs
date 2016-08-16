@@ -41,14 +41,37 @@ namespace SmallDahuaLib
             _LoginId = response.LoginId;
         }
 
+        private static void Combine(ref byte[] first, byte[] second)
+        {
+            int l1, l2;
+            l1 = first.Length;
+            l2 = second.Length;
+            Array.Resize(ref first, l1 + l2);
+            Array.Copy(second, 0, first, l1, l2);
+        }
+
         public byte[] CaptureChannel(byte channel)
+        {
+            return TakeScreenshot(channel);
+        }
+
+        public byte[] TakeScreenshot(byte channel)
         {
             var request = new CaptureRequest(channel);
             request.Serialize(_NStream);
-            var response = BinarySerializer.Deserialize<CaptureResponse>(_NStream);
-            byte[] bytes = _NStream.ReadAllBytes(response.Length);
-            response = BinarySerializer.Deserialize<CaptureResponse>(_NStream);
-            return bytes;
+            CaptureResponse response;
+            byte[] imageData = new byte[0];
+
+            do
+            {
+                response = BinarySerializer.Deserialize<CaptureResponse>(_NStream);
+                var bytes = _NStream.ReadAllBytes(response.Length);
+                Combine(ref imageData, bytes);
+
+            } while (response.Length > 0);
+
+
+            return imageData;
         }
 
         public void Logout()
