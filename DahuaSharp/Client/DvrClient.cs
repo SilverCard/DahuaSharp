@@ -50,11 +50,17 @@ namespace SmallDahuaLib
             Array.Copy(second, 0, first, l1, l2);
         }
 
+        [Obsolete("CaptureChannel is deprecated, please use TakeScreenshot instead.")]
         public byte[] CaptureChannel(byte channel)
         {
             return TakeScreenshot(channel);
         }
 
+        /// <summary>
+        /// Take a screenshot of a channel.
+        /// </summary>
+        /// <param name="channel">Channel number.</param>
+        /// <returns>Image data.</returns>
         public byte[] TakeScreenshot(byte channel)
         {
             var request = new CaptureRequest(channel);
