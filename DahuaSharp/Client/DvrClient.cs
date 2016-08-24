@@ -62,7 +62,7 @@ namespace SmallDahuaLib
             int len = BitConverter.ToInt32(response, 4);
             var extraData = _NStream.ReadAllBytes(len);
 
-            String longStr = Encoding.ASCII.GetString(extraData);
+            String longStr = Encoding.UTF8.GetString(extraData);
             return longStr.Split(new String[] { "&&" }, StringSplitOptions.RemoveEmptyEntries);
         }
 
