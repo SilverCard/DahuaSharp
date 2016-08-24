@@ -1,6 +1,7 @@
 ﻿using SmallDahuaLib.Packets;
 using System;
 using System.Net.Sockets;
+using System.Text;
 
 namespace SmallDahuaLib
 {
@@ -48,6 +49,21 @@ namespace SmallDahuaLib
             l2 = second.Length;
             Array.Resize(ref first, l1 + l2);
             Array.Copy(second, 0, first, l1, l2);
+        }
+
+        public String[] GetChannelNames()
+        {
+            byte[] request = new byte[32];
+            request[0] = 0xa8;
+            request[8] = 8;
+
+            _NStream.Write(request, 0, 32);
+            var response = _NStream.ReadAllBytes(32);
+            int len = BitConverter.ToInt32(response, 4);
+            var extraData = _NStream.ReadAllBytes(len);
+
+            String longStr = Encoding.ASCII.GetString(extraData);
+            return longStr.Split(new String[] { "&&" }, StringSplitOptions.RemoveEmptyEntries);
         }
 
         [Obsolete("CaptureChannel is deprecated, please use TakeScreenshot instead.")]
