@@ -1,4 +1,5 @@
-﻿using SmallDahuaLib.Packets;
+﻿using SilverCard.DahuaSharp.Packets;
+using SmallDahuaLib.Packets;
 using System;
 using System.Net.Sockets;
 using System.Text;
@@ -54,49 +55,41 @@ namespace SmallDahuaLib
             Array.Copy(second, 0, first, l1, l2);
         }
 
-        //public String[] GetChannelNames()
-        //{
-        //    byte[] request = new byte[32];
-        //    request[0] = 0xa8;
-        //    request[8] = 8;
-
-        //    _NStream.Write(request, 0, 32);
-        //    var response = _NStream.ReadAllBytes(32);
-        //    int len = BitConverter.ToInt32(response, 4);
-        //    var extraData = _NStream.ReadAllBytes(len);
-
-        //    String longStr = Encoding.UTF8.GetString(extraData);
-        //    return longStr.Split(new String[] { "&&" }, StringSplitOptions.RemoveEmptyEntries);
-        //}
-
-        [Obsolete("CaptureChannel is deprecated, please use TakeScreenshot instead.")]
-        public byte[] CaptureChannel(byte channel)
+        public async Task<String[]> GetChannelNamesAsync()
         {
-            return TakeScreenshot(channel);
+            GetChannelNamesRequest req = new GetChannelNamesRequest();
+            await _Serializer.SerializeAsync(req);
+            var packet = await _Serializer.DeserializeAsync();
+
+            String longStr = Encoding.UTF8.GetString(packet.Body);
+            return longStr.Split(new String[] { "&&" }, StringSplitOptions.RemoveEmptyEntries);
         }
+
 
         /// <summary>
         /// Take a screenshot of a channel.
         /// </summary>
         /// <param name="channel">Channel number.</param>
         /// <returns>Image data.</returns>
-        public byte[] TakeScreenshot(byte channel)
+        public async Task<byte[]> TakeScreenshotAsync(byte channel)
         {
-            //var request = new CaptureRequest(channel);
-            //request.Serialize(_NStream);
-            //CaptureResponse response;
-            //byte[] imageData = new byte[0];
+            CaptureRequest req = new CaptureRequest(channel);
+            await _Serializer.SerializeAsync(req);
+            BinaryPacket response;
+            byte[] imageData = new byte[0];
 
-            //do
-            //{
-            //    response = BinarySerializer.Deserialize<CaptureResponse>(_NStream);
-            //    var bytes = _NStream.ReadAllBytes(response.Length);
-            //    Combine(ref imageData, bytes);
+            do
+            {
+                response = await _Serializer.DeserializeAsync();
+                if (response.Body != null && response.Body.Length > 0)
+                {
+                    Combine(ref imageData, response.Body);
+                }
 
-            //} while (response.Length > 0);
+            } while (response.Body != null && response.Body.Length > 0);
 
-            return null;
-            //return imageData;
+
+            return imageData;
         }
 
         public void Logout()

@@ -47,7 +47,7 @@
     <Compile Include="Extentions.cs" />
     <Compile Include="FieldAttribute.cs" />
     <Compile Include="FieldInfo.cs" />
-    <Compile Include="Packets\CaptureResponse.cs" />
+    <Compile Include="Packets\GetChannelNamesRequest.cs" />
     <Compile Include="Packets\LoginRequest.cs" />
     <Compile Include="Packets\LoginResponse.cs" />
     <Compile Include="Packets\Logout.cs" />

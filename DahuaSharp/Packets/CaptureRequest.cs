@@ -11,17 +11,27 @@ namespace SmallDahuaLib.Packets
     {
         [Field(0)]
         private static readonly byte[] HeaderData = {
-                                0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00, 0x00 };
 
+
         [Field(1)]
-        public byte Channel { get; private set; }
+        public byte Channel
+        {
+            get
+            {
+                return _Footer[0];
+            }
+            private set
+            {
+                _Footer[0] = value;
+            }
+        }
 
         [Field(2)]
-        private static readonly byte[] Footer = {
-                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        private byte[] _Footer = {
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
                                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -32,6 +42,7 @@ namespace SmallDahuaLib.Packets
 
         public CaptureRequest(byte channel) : base(0x11)
         {
+
             Channel = channel;
         }
     }
