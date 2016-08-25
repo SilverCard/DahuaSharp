@@ -1,12 +1,11 @@
-﻿using System;
+﻿using SilverCard.DahuaSharp.Packets;
+using System;
 
 namespace SmallDahuaLib.Packets
 {
-    public class Login : BinaryPacket
-    {        
-        [Field(0)]
-        private byte[] Header1 = new byte[] { 0x01, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00 };
-        
+    public class LoginRequest : PacketBase
+    {      
+                
         [Field(1,8)]
         public String Username { get; private set; }
 
@@ -17,10 +16,12 @@ namespace SmallDahuaLib.Packets
         private byte[] Footer = new byte[] { 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0xa1, 0xaa };
         
 
-        public Login(String username, String password) : base(0xa0)
+        public LoginRequest(String username, String password) : base(0xa0)
         {
             Username = username;
             Password = password;
+            Params[0] = 1;
+            Params[2] = 0x60;
         }
     }
 }

@@ -1,15 +1,110 @@
-﻿using SmallDahuaLib.Packets;
+﻿using SilverCard.DahuaSharp.Packets;
+using SmallDahuaLib.Packets;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SmallDahuaLib
 {
-    public static class BinarySerializer
+    public class BinarySerializer
     {
+        private Stream _Stream;
+
+        public BinarySerializer(Stream stream)
+        {
+            _Stream = stream;
+        }
+
+        public Task SerializeAsync(PacketBase packet)
+        {
+            var bp = SerializeToBinaryPacket(packet);
+            return SerializeAsync(bp);
+        }
+
+        public BinaryPacket SerializeToBinaryPacket(PacketBase packet)
+        {
+            BinaryPacket bp = new BinaryPacket();
+            bp.Id = packet.Id;
+            Array.Copy(packet.Params, bp.Params, bp.Params.Length);
+            bp.Body = packet.Body;
+            SerializeHeader(packet, bp.Header);
+            return bp;
+        }
+
+        public async Task SerializeAsync(BinaryPacket packet)
+        {
+            byte[] packetHeader = new byte[32];
+            packetHeader[0] = packet.Id;
+            Array.Copy(packet.Params, 0, packetHeader, 1, packet.Params.Length);
+
+            int len = packet.Body == null ? 0 : packet.Body.Length;
+            byte[] lenBytes = BitConverter.GetBytes(len);
+
+            Array.Copy(lenBytes, 0, packetHeader, 4, lenBytes.Length);
+            Array.Copy(packet.Header, 0, packetHeader, 8, packet.Header.Length);
+
+            await _Stream.WriteAsync(packetHeader, 0, packetHeader.Length);
+
+            if (len > 0)
+            {
+                await _Stream.WriteAsync(packet.Body, 0, len);
+            }
+
+        }
+
+        public async Task<T> DeserializeAsync<T>() where T : PacketBase, new()
+        {
+            var packet = await DeserializeAsync();
+            return DeserializeAsync<T>(packet);
+        }
+
+        public T DeserializeAsync<T>(BinaryPacket packet) where T : PacketBase, new()
+        {
+            T obj = new T();
+
+            if (obj.Id != packet.Id)
+            {
+                throw new Exception("Wrong packet header.");
+            }
+
+            Array.Copy(packet.Params, obj.Params, obj.Params.Length);
+
+            if (packet.Body != null)
+            {
+                obj.Body = packet.Body;
+            }
+
+            DeserializeHeader(obj, packet.Header);
+            return obj;
+        }
+
+        public PacketBase DeserializeAsync(BinaryPacket packet)
+        {
+            return null;
+        }
+
+        public async Task<BinaryPacket> DeserializeAsync()
+        {
+            byte[] packetHeader = await _Stream.ReadAllBytesAsync(32);
+            BinaryPacket bp = new BinaryPacket();
+
+            bp.Id = packetHeader[0];
+            Array.Copy(packetHeader, 1, bp.Params, 0, bp.Params.Length);
+            int bodyLen = BitConverter.ToInt32(packetHeader, 4);
+            Array.Copy(packetHeader, 8, bp.Header, 0, bp.Header.Length);
+
+            if (bodyLen > 0)
+            {
+                bp.Body = await _Stream.ReadAllBytesAsync(bodyLen);
+            }
+
+            return bp;
+        }
+
         private static byte[] SerializeString(String str, int maxLength)
         {
             if (maxLength <= 0) throw new ArgumentOutOfRangeException("maxLength");
@@ -39,49 +134,52 @@ namespace SmallDahuaLib
 
         private static byte[] SerializeInt(Int32 n)
         {
-            return BitConverter.GetBytes(n).ToArray();
+            return BitConverter.GetBytes(n);
         }
 
         private static byte[] SerializeInt(Int16 n)
         {
-            return BitConverter.GetBytes(n).ToArray();
+            return BitConverter.GetBytes(n);
         }
 
-        internal static void Serialize(BinaryPacket bp, Stream stream)
+        private static void CopyArray(byte[] source, byte[] destination, ref int destinationIdx)
+        {
+            Array.Copy(source, 0, destination, destinationIdx, source.Length);
+            destinationIdx += source.Length;
+        }
+
+        internal static void SerializeHeader(PacketBase bp, byte[] data)
         {
             var fieldsInfos = new List<FieldInfo>();
 
             fieldsInfos.AddRange(bp.GetType().GetProperties().Where(p => Attribute.IsDefined(p, typeof(FieldAttribute))).Select(x => FieldInfo.FromPropertyInfo(x, bp)));
             fieldsInfos.AddRange(bp.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Where(p => Attribute.IsDefined(p, typeof(FieldAttribute))).Select(x => FieldInfo.FromFieldInfo(x, bp)));
 
-            stream.WriteByte(bp.Header);
+            int idx = 0;
 
             foreach (var fieldInfo in fieldsInfos.OrderBy(x => x.Field.Order))
             {
                 var value = fieldInfo.Value;
                 if (value is Byte)
                 {
-                    stream.WriteByte((Byte)value);
+                    data[idx] = 0;
+                    idx++;
                 }
                 else if (value is Byte[])
                 {
-                    var byteValue = (Byte[])value;
-                    stream.Write(byteValue, 0, byteValue.Length);
+                    CopyArray((Byte[])value, data, ref idx);
                 }
                 else if (value is String)
                 {
-                    var byteValue = SerializeString((String)value, fieldInfo.Field.Length);
-                    stream.Write(byteValue, 0, byteValue.Length);
+                    CopyArray(SerializeString((String)value, fieldInfo.Field.Length), data, ref idx);
                 }
                 else if (value is Int16)
                 {
-                    var byteValue = SerializeInt((Int16)value);
-                    stream.Write(byteValue, 0, byteValue.Length);
+                    CopyArray(BitConverter.GetBytes((Int16)value), data, ref idx);
                 }
                 else if (value is Int32)
                 {
-                    var byteValue = SerializeInt((Int32)value);
-                    stream.Write(byteValue, 0, byteValue.Length);
+                    CopyArray(BitConverter.GetBytes((Int32)value), data, ref idx);
                 }
                 else
                 {
@@ -90,42 +188,39 @@ namespace SmallDahuaLib
             }
         }
 
-        internal static T Deserialize<T>(Stream stream) where T : BinaryPacket, new()
+        internal static void DeserializeHeader(PacketBase packet, byte[] header)
         {
-            T obj = new T();     
-            byte header = (byte)stream.ReadByte();
-
-            if(header != obj.Header)
-            {
-                throw new Exception( String.Format("Invalid packet type, expected {0}, got {1}.", obj.Header, obj.Header));
-            }
-
+            var type = packet.GetType();
             var fieldsInfos = new List<FieldInfo>();
+            fieldsInfos.AddRange(type.GetProperties().Where(p => Attribute.IsDefined(p, typeof(FieldAttribute))).Select(x => FieldInfo.FromPropertyInfo(x)));
+            fieldsInfos.AddRange(type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Where(p => Attribute.IsDefined(p, typeof(FieldAttribute))).Select(x => FieldInfo.FromFieldInfo(x)));
 
-            fieldsInfos.AddRange(typeof(T).GetProperties().Where(p => Attribute.IsDefined(p, typeof(FieldAttribute))).Select(x => FieldInfo.FromPropertyInfo(x)));
-            fieldsInfos.AddRange(typeof(T).GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).Where(p => Attribute.IsDefined(p, typeof(FieldAttribute))).Select(x => FieldInfo.FromFieldInfo(x)));
-              
+            int idx = 0;
 
             foreach (var fieldInfo in fieldsInfos.OrderBy(x => x.Field.Order))
             {
                 if (fieldInfo.MemberInfo is System.Reflection.PropertyInfo)
                 {
                     var pi = (System.Reflection.PropertyInfo)fieldInfo.MemberInfo;
-                    var type = pi.PropertyType;
+                    var propType = pi.PropertyType;
 
-                    if (type == typeof(Byte))
-                    {                      
-                        pi.SetValue(obj, (byte)stream.ReadByte());
-                    }
-                    else if (type == typeof(Byte[]))
+                    if (propType == typeof(Byte))
                     {
-                        var valueBytes = stream.ReadAllBytes(fieldInfo.Field.Length);  
-                        pi.SetValue(obj, valueBytes);
+                        pi.SetValue(packet, header[idx]);
+                        idx++;
                     }
-                    else if (type == typeof(Int32))
+                    else if (propType == typeof(Byte[]))
                     {
-                        var value = BitConverter.ToInt32(stream.ReadAllBytes(4),0);
-                        pi.SetValue(obj, value);
+                        var valueBytes = new byte[fieldInfo.Field.Length];
+                        Array.Copy(header, idx, valueBytes, 0, valueBytes.Length);
+                        idx += valueBytes.Length;
+                        pi.SetValue(packet, valueBytes);
+                    }
+                    else if (propType == typeof(Int32))
+                    {
+                        var value = BitConverter.ToInt32(header, idx);
+                        idx += 4;
+                        pi.SetValue(packet, value);
                     }
                     else
                     {
@@ -143,7 +238,7 @@ namespace SmallDahuaLib
                 }
             }
 
-            return obj;
         }
     }
 }
+

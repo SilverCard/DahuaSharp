@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SmallDahuaLib.Packets
+﻿namespace SmallDahuaLib.Packets
 {
-    public abstract class BinaryPacket
+    public class BinaryPacket
     {
-        public byte Header { get; private set; }
+        public byte Id { get; set; }
+        public byte[] Params { get; private set; }
+        public byte[] Header { get; private set; }
+        public byte[] Body { get; set; }
 
-        protected BinaryPacket(byte header)
+        public BinaryPacket()
         {
-            Header = header;
+            Params = new byte[3];
+            Header = new byte[24];
+            Body = null;
         }
 
-        public void Serialize(Stream stream)
-        {
-            BinarySerializer.Serialize(this, stream);
-        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SilverCard.DahuaSharp.Packets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,16 +7,23 @@ using System.Threading.Tasks;
 
 namespace SmallDahuaLib.Packets
 {
-    public class LoginResponse : BinaryPacket
+    public class LoginResponse : PacketBase
     {
-        [Field(1)]
-        public byte MultipleWindowsPreviewSupport { get; set; }
-
-        [Field(2, 6)]
-        public byte[] Unk1 { get; set; }
+        public byte MultipleWindowsPreviewSupport
+        {
+            get
+            {
+                return Params[0];
+            }
+            set
+            {
+                Params[0] = value;
+            }
+        }
 
         [Field(3)]
         public byte ReturnCode { get; set; }
+
         [Field(4)]
         public byte Unk2 { get; set; }
 

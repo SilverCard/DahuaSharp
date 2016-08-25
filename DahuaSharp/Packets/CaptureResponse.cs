@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SilverCard.DahuaSharp.Packets;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SmallDahuaLib.Packets
 {
-    public class CaptureResponse : BinaryPacket
+    public class CaptureResponse : PacketBase
     {
 
         [Field(0, 3)]
