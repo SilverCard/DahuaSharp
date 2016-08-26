@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SmallDahuaLib
@@ -19,10 +20,15 @@ namespace SmallDahuaLib
             _Stream = stream;
         }
 
-        public Task SerializeAsync(PacketBase packet)
+        public Task SerializeAsync(PacketBase packet, CancellationToken ct)
         {
             var bp = SerializeToBinaryPacket(packet);
-            return SerializeAsync(bp);
+            return SerializeAsync(bp, ct);
+        }
+
+        public Task SerializeAsync(PacketBase packet)
+        {
+            return SerializeAsync(packet, CancellationToken.None);
         }
 
         public BinaryPacket SerializeToBinaryPacket(PacketBase packet)
@@ -35,7 +41,7 @@ namespace SmallDahuaLib
             return bp;
         }
 
-        public async Task SerializeAsync(BinaryPacket packet)
+        public async Task SerializeAsync(BinaryPacket packet, CancellationToken ct)
         {
             byte[] packetHeader = new byte[32];
             packetHeader[0] = packet.Id;
@@ -47,18 +53,23 @@ namespace SmallDahuaLib
             Array.Copy(lenBytes, 0, packetHeader, 4, lenBytes.Length);
             Array.Copy(packet.Header, 0, packetHeader, 8, packet.Header.Length);
 
-            await _Stream.WriteAsync(packetHeader, 0, packetHeader.Length);
+            await _Stream.WriteAsync(packetHeader, 0, packetHeader.Length, ct);
 
             if (len > 0)
             {
-                await _Stream.WriteAsync(packet.Body, 0, len);
+                await _Stream.WriteAsync(packet.Body, 0, len, ct);
             }
 
         }
 
-        public async Task<T> DeserializeAsync<T>() where T : PacketBase, new()
+        public Task<T> DeserializeAsync<T>() where T : PacketBase, new()
         {
-            var packet = await DeserializeAsync();
+            return DeserializeAsync<T>(CancellationToken.None);
+        }
+
+        public async Task<T> DeserializeAsync<T>(CancellationToken ct) where T : PacketBase, new()
+        {
+            var packet = await DeserializeAsync(ct);
             return DeserializeAsync<T>(packet);
         }
 
@@ -87,9 +98,14 @@ namespace SmallDahuaLib
             return null;
         }
 
-        public async Task<BinaryPacket> DeserializeAsync()
+        public Task<BinaryPacket> DeserializeAsync()
         {
-            byte[] packetHeader = await _Stream.ReadAllBytesAsync(32);
+            return DeserializeAsync(CancellationToken.None);
+        }
+
+        public async Task<BinaryPacket> DeserializeAsync(CancellationToken ct)
+        {
+            byte[] packetHeader = await _Stream.ReadAllBytesAsync(32, ct);
             BinaryPacket bp = new BinaryPacket();
 
             bp.Id = packetHeader[0];
@@ -99,7 +115,7 @@ namespace SmallDahuaLib
 
             if (bodyLen > 0)
             {
-                bp.Body = await _Stream.ReadAllBytesAsync(bodyLen);
+                bp.Body = await _Stream.ReadAllBytesAsync(bodyLen, ct);
             }
 
             return bp;

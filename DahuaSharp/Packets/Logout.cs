@@ -9,8 +9,6 @@ namespace SmallDahuaLib.Packets
 {
     public class Logout : PacketBase
     {
-        [Field(0)]
-        private byte[] HeaderData = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 
         [Field(1)]
         public int LoginId { get; set; }

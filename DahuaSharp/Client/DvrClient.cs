@@ -25,9 +25,9 @@ namespace SmallDahuaLib
             Timeout = 30 * 1000;
         }
 
-        public void Connect()
+        public async Task ConnectAsync()
         {
-           _Client.Connect(Host, Port);
+           await _Client.ConnectAsync(Host, Port);
             _NStream = _Client.GetStream();
             _Serializer = new BinarySerializer(_NStream);
         }
@@ -92,11 +92,11 @@ namespace SmallDahuaLib
             return imageData;
         }
 
-        public void Logout()
+        public async Task Logout()
         {
-            //var request = new Logout() { LoginId = _LoginId };
-            //request.Serialize(_NStream);
-            //_Client.Close();
+            var request = new Logout() { LoginId = _LoginId };
+            await _Serializer.SerializeAsync(request);
+            _Client.Close();
         }
 
         /// <summary>
