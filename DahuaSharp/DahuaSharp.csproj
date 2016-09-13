@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SilverCard.DahuaSharp</RootNamespace>
-    <AssemblyName>SmallDahuaLib</AssemblyName>
+    <AssemblyName>SilverCard.DahuaSharp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
