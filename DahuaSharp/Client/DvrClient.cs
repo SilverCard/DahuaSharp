@@ -1,5 +1,6 @@
 ﻿using SmallDahuaLib.Packets;
 using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
@@ -42,15 +43,6 @@ namespace SmallDahuaLib
             _LoginId = response.LoginId;
         }
 
-        private static void Combine(ref byte[] first, byte[] second)
-        {
-            int l1, l2;
-            l1 = first.Length;
-            l2 = second.Length;
-            Array.Resize(ref first, l1 + l2);
-            Array.Copy(second, 0, first, l1, l2);
-        }
-
         public String[] GetChannelNames()
         {
             byte[] request = new byte[32];
@@ -81,19 +73,23 @@ namespace SmallDahuaLib
         {
             var request = new CaptureRequest(channel);
             request.Serialize(_NStream);
-            CaptureResponse response;
-            byte[] imageData = new byte[0];
+            CaptureResponse response;   
 
-            do
+            using (MemoryStream ms = new MemoryStream())
             {
-                response = BinarySerializer.Deserialize<CaptureResponse>(_NStream);
-                var bytes = _NStream.ReadAllBytes(response.Length);
-                Combine(ref imageData, bytes);
+                do
+                {
+                    response = BinarySerializer.Deserialize<CaptureResponse>(_NStream);
+                    var bytes = _NStream.ReadAllBytes(response.Length);
+                    if(bytes.Length > 0)
+                    {
+                        ms.Write(bytes, 0, bytes.Length);
+                    }
 
-            } while (response.Length > 0);
+                } while (response.Length > 0);
 
-
-            return imageData;
+                return ms.ToArray();
+            }
         }
 
         public void Logout()
