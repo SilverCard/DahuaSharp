@@ -1,4 +1,4 @@
-﻿using SmallDahuaLib.Packets;
+﻿using DahuaSharp.Packets;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace SmallDahuaLib
+namespace DahuaSharp
 {
     public static class BinarySerializer
     {
@@ -119,12 +119,12 @@ namespace SmallDahuaLib
                     }
                     else if (type == typeof(Byte[]))
                     {
-                        var valueBytes = stream.ReadAllBytes(fieldInfo.Field.Length);  
+                        var valueBytes = stream.ReadResponse(fieldInfo.Field.Length);  
                         pi.SetValue(obj, valueBytes);
                     }
                     else if (type == typeof(Int32))
                     {
-                        var value = BitConverter.ToInt32(stream.ReadAllBytes(4),0);
+                        var value = BitConverter.ToInt32(stream.ReadResponse(4),0);
                         pi.SetValue(obj, value);
                     }
                     else

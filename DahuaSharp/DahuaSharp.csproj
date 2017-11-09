@@ -7,8 +7,8 @@
     <ProjectGuid>{68EAADEE-77CF-49D7-A504-52F8F2D0B3D2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SilverCard.DahuaSharp</RootNamespace>
-    <AssemblyName>SilverCard.DahuaSharp</AssemblyName>
+    <RootNamespace>DahuaSharp</RootNamespace>
+    <AssemblyName>DahuaSharp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -43,6 +43,7 @@
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="Client\DvrClient.cs" />
     <Compile Include="Exceptions\LoginException.cs" />
+    <Compile Include="Exceptions\ProtocolException.cs" />
     <Compile Include="Packets\CaptureRequest.cs" />
     <Compile Include="Extentions.cs" />
     <Compile Include="FieldAttribute.cs" />

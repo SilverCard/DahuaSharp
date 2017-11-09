@@ -1,24 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace SmallDahuaLib
+namespace DahuaSharp
 {
     public static class Extentions
     {
-        public static Byte[] ReadAllBytes(this Stream stream, int count)
+        /// <summary>
+        /// Read a response from stream with specified size.
+        /// </summary>
+        /// <param name="size">Expected size of response.</param>
+        /// <returns></returns>
+        public static Byte[] ReadResponse(this Stream stream, int size)
         {
-            Byte[] b = new byte[count];
+            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size));
+
+            Byte[] b = new byte[size];
             int i = 0;
-            while (i < count)
+            while (i < size)
             {
-                int r = stream.Read(b, i, count - i);
+                int r = stream.Read(b, i, size - i);
+                if (r == 0) break;
                 i += r;
             }
+
+            if (i != size) throw new ProtocolException($"Response have an unexpected size {i} bytes, expected {size}.");
 
             return b;
         }

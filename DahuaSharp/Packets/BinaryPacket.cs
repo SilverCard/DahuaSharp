@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmallDahuaLib.Packets
+namespace DahuaSharp.Packets
 {
     public abstract class BinaryPacket
     {

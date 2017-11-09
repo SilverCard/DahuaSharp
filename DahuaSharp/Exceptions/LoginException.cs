@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SmallDahuaLib
+namespace DahuaSharp
 {
     public class LoginException : Exception
     {

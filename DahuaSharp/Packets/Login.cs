@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SmallDahuaLib.Packets
+namespace DahuaSharp.Packets
 {
     public class Login : BinaryPacket
     {        

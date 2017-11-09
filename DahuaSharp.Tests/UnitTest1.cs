@@ -2,9 +2,9 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
-using SmallDahuaLib.Packets;
+using DahuaSharp.Packets;
 
-namespace SmallDahuaLib.Tests
+namespace DahuaSharp.Tests
 {
     [TestClass]
     public class UnitTest1

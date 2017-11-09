@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SmallDahuaLib
+namespace DahuaSharp
 {
     /// <summary>
     /// This attribute helps to serialize the BinaryPackets.

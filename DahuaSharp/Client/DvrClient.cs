@@ -1,10 +1,10 @@
-﻿using SmallDahuaLib.Packets;
+﻿using DahuaSharp.Packets;
 using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
-namespace SmallDahuaLib
+namespace DahuaSharp
 {
     public class DvrClient
     {
@@ -20,7 +20,7 @@ namespace SmallDahuaLib
             Host = host;
             Port = port;
             _Client = new TcpClient();
-            Timeout = 30 * 1000;
+            Timeout = 30 * 1000;           
         }
 
         public void Connect()
@@ -33,12 +33,9 @@ namespace SmallDahuaLib
         {
             Login packet = new Login(username, password);
             packet.Serialize(_NStream);
-            var response = BinarySerializer.Deserialize<LoginResponse>(_NStream);
 
-            if(response.ReturnCode != 0)
-            {
-                throw new LoginException(response.ReturnCode);
-            }
+            var response = BinarySerializer.Deserialize<LoginResponse>(_NStream);
+            if(response.ReturnCode != 0) throw new LoginException(response.ReturnCode);
 
             _LoginId = response.LoginId;
         }
@@ -50,18 +47,12 @@ namespace SmallDahuaLib
             request[8] = 8;
 
             _NStream.Write(request, 0, 32);
-            var response = _NStream.ReadAllBytes(32);
+            var response = _NStream.ReadResponse(32);
             int len = BitConverter.ToInt32(response, 4);
-            var extraData = _NStream.ReadAllBytes(len);
+            var extraData = _NStream.ReadResponse(len);
 
             String longStr = Encoding.UTF8.GetString(extraData);
             return longStr.Split(new String[] { "&&" }, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-        [Obsolete("CaptureChannel is deprecated, please use TakeScreenshot instead.")]
-        public byte[] CaptureChannel(byte channel)
-        {
-            return TakeScreenshot(channel);
         }
 
         /// <summary>
@@ -80,7 +71,7 @@ namespace SmallDahuaLib
                 do
                 {
                     response = BinarySerializer.Deserialize<CaptureResponse>(_NStream);
-                    var bytes = _NStream.ReadAllBytes(response.Length);
+                    var bytes = _NStream.ReadResponse(response.Length);
                     if(bytes.Length > 0)
                     {
                         ms.Write(bytes, 0, bytes.Length);
