@@ -60,7 +60,7 @@ namespace DahuaSharp
         /// </summary>
         /// <param name="channel">Channel number.</param>
         /// <returns>Image data.</returns>
-        public byte[] TakeScreenshot(byte channel)
+        public byte[] Snapshot(byte channel)
         {
             var request = new CaptureRequest(channel);
             request.Serialize(_NStream);
