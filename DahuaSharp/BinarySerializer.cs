@@ -90,14 +90,24 @@ namespace DahuaSharp
             }
         }
 
+        private static byte ReadByte(Stream stream)
+        {
+            int b1 = stream.ReadByte();
+            if(b1 == -1)
+            {
+                throw new EndOfStreamException("Disconnected");
+            }
+            return (byte)b1;
+        }
+
         internal static T Deserialize<T>(Stream stream) where T : BinaryPacket, new()
         {
-            T obj = new T();     
-            byte header = (byte)stream.ReadByte();
+            T obj = new T();
+            byte header = ReadByte(stream);
 
-            if(header != obj.Header)
+            if (header != obj.Header)
             {
-                throw new Exception( String.Format("Invalid packet type, expected {0}, got {1}.", obj.Header, obj.Header));
+                throw new InvalidOperationException( String.Format("Invalid packet type, expected {0}, got {1}.", obj.Header, header));
             }
 
             var fieldsInfos = new List<FieldInfo>();
@@ -115,7 +125,7 @@ namespace DahuaSharp
 
                     if (type == typeof(Byte))
                     {                      
-                        pi.SetValue(obj, (byte)stream.ReadByte());
+                        pi.SetValue(obj, ReadByte(stream));
                     }
                     else if (type == typeof(Byte[]))
                     {
