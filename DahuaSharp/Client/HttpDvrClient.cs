@@ -27,23 +27,37 @@ namespace DahuaSharp
                 new AuthenticationHeaderValue("Basic", Convert.ToBase64String(basicAuthValue));
         }
 
-        public void Dispose()
-        {
-            httpClient?.Dispose();
-        }
-
-        public async Task<byte[]> Snapshot(byte channel)
+        public async Task<byte[]> GetSnapshotAsync(byte channel = 0)
         {
             try
             {
-                var response = await httpClient.GetByteArrayAsync($"cgi-bin/snapshot.cgi?channel={channel}");
-                return response;
+                var response = await httpClient.GetAsync($"cgi-bin/snapshot.cgi?channel={channel}");
+                var responseType = response.Content.Headers.ContentType.MediaType;
+
+                if (responseType == "image/jpeg")
+                {
+                    return await response.Content.ReadAsByteArrayAsync();
+                }
+                else if(responseType == "text/plain")
+                {
+                    throw new DahuaHttpException(await response.Content.ReadAsStringAsync());
+                }
+                else
+                {
+                    throw new DahuaHttpException("Response has an invalid content type.");
+                }
+             
             }
             catch (TaskCanceledException)
             {
-                throw new Exception("Timeout. This can be a wrong password or invalid channel.");
+                throw new DahuaHttpException("Timeout. This can be a wrong password or invalid channel.");
             }
 
+        }
+
+        public void Dispose()
+        {
+            httpClient?.Dispose();
         }
     }
 }

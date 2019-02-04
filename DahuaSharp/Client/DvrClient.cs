@@ -40,7 +40,7 @@ namespace DahuaSharp
             _LoginId = response.LoginId;
         }
 
-        public String[] GetChannelNames()
+        public String[] GetChannelsTitles()
         {
             byte[] request = new byte[32];
             request[0] = 0xa8;
@@ -55,12 +55,7 @@ namespace DahuaSharp
             return longStr.Split(new String[] { "&&" }, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        /// <summary>
-        /// Take a screenshot of a channel.
-        /// </summary>
-        /// <param name="channel">Channel number.</param>
-        /// <returns>Image data.</returns>
-        public byte[] Snapshot(byte channel)
+        public byte[] GetSnapshot(byte channel = 0)
         {
             var request = new CaptureRequest(channel);
             request.Serialize(_NStream);

@@ -43,6 +43,7 @@
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="Client\DvrClient.cs" />
     <Compile Include="Client\HttpDvrClient.cs" />
+    <Compile Include="Exceptions\DahuaHttpException.cs" />
     <Compile Include="Exceptions\LoginException.cs" />
     <Compile Include="Exceptions\ProtocolException.cs" />
     <Compile Include="Packets\CaptureRequest.cs" />
