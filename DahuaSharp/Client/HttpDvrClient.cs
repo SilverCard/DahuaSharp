@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DahuaSharp
 {
-    public class HttpDvrClient
+    public class HttpDvrClient : IDisposable
     {
         HttpClient httpClient;
 
@@ -25,6 +25,11 @@ namespace DahuaSharp
             var basicAuthValue = Encoding.ASCII.GetBytes($"{login}:{password}");
             httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Basic", Convert.ToBase64String(basicAuthValue));
+        }
+
+        public void Dispose()
+        {
+            httpClient?.Dispose();
         }
 
         public async Task<byte[]> Snapshot(byte channel)

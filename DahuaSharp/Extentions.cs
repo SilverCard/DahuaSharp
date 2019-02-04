@@ -12,7 +12,7 @@ namespace DahuaSharp
         /// <returns></returns>
         public static Byte[] ReadResponse(this Stream stream, int size)
         {
-            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size));
+            if (size < 0) throw new ArgumentOutOfRangeException(nameof(size));
 
             Byte[] b = new byte[size];
             int i = 0;
