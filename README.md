@@ -12,8 +12,8 @@ Quick Example:
 var c = new DvrClient("192.168.13.37");
 c.Connect();
 c.Login("admin", "admin");
-String[] channels = c.GetChannelNames();
-byte[] b = c.Snapshot(0);
+String[] channels = c.GetChannelsTitles();
+byte[] b = c.GetSnapshot(0);
 ```
 
 
