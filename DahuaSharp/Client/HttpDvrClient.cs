@@ -1,7 +1,6 @@
-﻿using System;
+using System;
+using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DahuaSharp
@@ -16,15 +15,11 @@ namespace DahuaSharp
             if (login == null) throw new ArgumentNullException(nameof(login));
             if (password == null) throw new ArgumentNullException(nameof(password));
 
-            httpClient = new HttpClient()
+            httpClient = new HttpClient(new HttpClientHandler { Credentials = new NetworkCredential(login, password) })
             {
                 BaseAddress = new Uri($"http://{host}:{port}/"),
                 Timeout = new TimeSpan(0, 0, 30)
             };
-
-            var basicAuthValue = Encoding.ASCII.GetBytes($"{login}:{password}");
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Basic", Convert.ToBase64String(basicAuthValue));
         }
 
         public async Task<byte[]> GetSnapshotAsync(byte channel = 0)
